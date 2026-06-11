@@ -89,30 +89,22 @@ git clone https://github.com/25f1001872/netflix-recsys.git
 cd netflix-recsys
 python -m venv venv
 venv\Scripts\activate
+python.exe -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
 **Step 2 — Install PyTorch with CUDA (for NCF GPU training)**
 ```bash
-# CUDA 11.8
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+# Install PyTorch according to your CUDA version
+# https://pytorch.org/get-started/locally/
 
-# CUDA 12.1
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-
-# CPU only (slower training)
-pip install torch torchvision
+# Example (CUDA 12.8)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 ```
 
 **Step 3 — Download raw dataset**
 
 Option A — Kaggle CLI:
-```bash
-# Place kaggle.json at C:\Users\USERNAME\.kaggle\kaggle.json
-python scripts/download_data.py
-```
-
-Option B — Manual:
 1. Go to [Kaggle — Netflix Prize Data](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data)
 2. Download and extract to `data/raw/`
 
@@ -124,12 +116,12 @@ python scripts/preprocess.py
 
 **Step 5 — Train all models**
 ```bash
-python scripts/train.py --model svd        # ~76 seconds
-python scripts/train.py --model als        # ~13 seconds
-python scripts/train.py --model item_cf    # ~54 seconds
-python scripts/train.py --model user_cf    # ~20 seconds
-python scripts/train.py --model ncf        # ~6 minutes (GPU)
-python scripts/train.py --model hybrid     # ~49 seconds
+python scripts/train.py --model svd        
+python scripts/train.py --model als       
+python scripts/train.py --model item_cf    
+python scripts/train.py --model user_cf   
+python scripts/train.py --model ncf        
+python scripts/train.py --model hybrid     
 ```
 
 **Step 6 — Evaluate**
