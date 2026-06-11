@@ -1,0 +1,53 @@
+# ═══════════════════════════════════════════════════════════════
+# requirements.txt
+# Netflix Prize Recommendation System
+# ═══════════════════════════════════════════════════════════════
+
+# ── Core Data & Math ──────────────────────────────────────────
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.11.0
+scikit-learn>=1.3.0
+PyYAML>=6.0
+pyarrow>=12.0.0
+
+# ── Parquet Support ───────────────────────────────────────────
+fastparquet>=2023.7.0
+
+# ── Matrix Factorization (Surprise) ───────────────────────────
+scikit-surprise>=1.1.3
+tabulate>=0.9.0
+
+# ── ALS / Implicit Feedback ───────────────────────────────────
+implicit>=0.7.2
+
+# ── Deep Learning ─────────────────────────────────────────────
+# torch and torchvision must be installed manually with CUDA support
+# Do NOT install via pip here — it will overwrite your GPU build
+# Installation command (CUDA 11.8):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+# Installation command (CUDA 12.1):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+
+# ── Visualization ─────────────────────────────────────────────
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.17.0
+
+# ── Notebook & EDA ────────────────────────────────────────────
+jupyter>=1.0.0
+ipykernel>=6.25.0
+ipywidgets>=8.1.0
+nbformat>=5.9.0
+
+# ── Progress & Utilities ──────────────────────────────────────
+tqdm>=4.66.0
+joblib>=1.3.0
+
+# ── API / Dashboard (Optional) ────────────────────────────────
+streamlit>=1.28.0
+fastapi>=0.104.0
+uvicorn>=0.24.0
+
+# ── Kaggle Dataset Download (Optional) ────────────────────────
+kaggle>=1.5.16

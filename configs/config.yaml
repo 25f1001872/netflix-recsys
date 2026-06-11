@@ -1,0 +1,81 @@
+# ============================================================
+# Netflix Recommendation System — Central Configuration
+# ============================================================
+
+paths:
+  raw_data:        "data/raw"
+  processed_data:  "data/processed"
+  samples:         "data/samples"
+  models:          "outputs/models"
+  plots:           "outputs/plots"
+  recommendations: "outputs/recommendations"
+  reports:         "outputs/reports"
+
+data:
+  rating_files:
+    - "combined_data_1.txt"
+    - "combined_data_2.txt"
+    - "combined_data_3.txt"
+    - "combined_data_4.txt"
+  movie_titles_file: "movie_titles.csv"
+  sample_size: 8000000
+  min_user_ratings: 20         # filter users with fewer ratings
+  min_movie_ratings: 50        # filter movies with fewer ratings
+  test_size: 0.2
+  val_size: 0.1
+  random_seed: 42
+  relevance_threshold: 3.5     # for MAP@10 calculation
+
+models:
+  svd:
+    n_factors: 100
+    n_epochs: 25
+    lr_all: 0.005
+    reg_all: 0.02
+    biased: true
+
+  als:
+    factors: 128
+    iterations: 20
+    regularization: 0.01
+    alpha: 40.0                # confidence scaling
+
+  ncf:
+    embedding_dim: 64
+    layers: [256, 128, 64, 32]
+    dropout: 0.2
+    learning_rate: 0.001
+    batch_size: 16384
+    epochs: 20
+    weight_decay: 1e-5
+    num_negatives: 4           # negative sampling ratio
+
+  user_cf:
+    k_neighbors: 50
+    similarity: "pearson"      # pearson | cosine
+    min_support: 5
+
+  item_cf:
+    k_neighbors: 40
+    similarity: "cosine"
+    min_support: 3
+
+  hybrid:
+    weights:
+      svd: 0.5
+      ncf: 0.5
+    meta_learner: "ridge"      # ridge | lasso | linear
+
+evaluation:
+  k_values: [5, 10, 20]
+  primary_k: 10
+  n_sample_users: 1000         # users to evaluate MAP@K on (speed/accuracy tradeoff)
+
+recommendation:
+  top_k: 10
+  exclude_seen: true           # don't recommend already-rated movies
+  cold_start_strategy: "popularity"  # popularity | genre_based
+
+logging:
+  level: "INFO"
+  file: "outputs/training.log"
