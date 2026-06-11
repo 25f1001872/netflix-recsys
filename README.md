@@ -37,6 +37,12 @@ python -m venv venv
 venv\Scripts\activate        # Windows
 # source venv/bin/activate   # Linux/Mac
 pip install -r requirements.txt
+
+# Install PyTorch according to your CUDA version
+# https://pytorch.org/get-started/locally/
+
+# Example (CUDA 12.8)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 ```
 
 **Step 2 — Download pre-trained assets from Google Drive**
