@@ -78,7 +78,7 @@ netflix-recsys/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/netflix-recsys.git
+git clone https://github.com/25f1001872/netflix-recsys.git
 cd netflix-recsys
 ```
 
@@ -111,16 +111,20 @@ pip install torch torchvision
 ```
 
 ### 5. Download the dataset
-See `data/README.md` for full instructions.
+See [`data/README.md`](data/README.md) for full instructions.
+
+**Quickest:** Download pre-processed files directly from [Google Drive](https://drive.google.com/drive/folders/1BHmm8tCai84doueU10fylx7l5J41FR9k?usp=sharing) and place them in `data/processed/`.
+
+**From scratch:** Download the raw Netflix Prize dataset from [Kaggle](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data), place in `data/raw/`, then run:
 ```bash
-python scripts/download_data.py
+python scripts/preprocess.py
 ```
 
 ---
 
 ## 🚀 Reproducing Results
 
-Run the full pipeline in order:
+> **Skip Step 1** if you downloaded pre-processed files from Google Drive.
 
 #### Step 1 — Preprocess
 ```bash
