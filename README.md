@@ -22,6 +22,138 @@ filtering to deep learning, with a Ridge-stacked hybrid ensemble.
 
 ---
 
+## 🚀 Quick Start — Two Options
+
+### ⚡ Option A — Pre-trained (Recommended, ~5 minutes)
+
+Everything is pre-computed and hosted on Google Drive.
+Download and run the dashboard immediately — no training required.
+
+**Step 1 — Clone & install**
+```bash
+git clone https://github.com/25f1001872/netflix-recsys.git
+cd netflix-recsys
+python -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # Linux/Mac
+pip install -r requirements.txt
+```
+
+**Step 2 — Download pre-trained assets from Google Drive**
+
+| Asset | Size | Link |
+|-------|------|------|
+| Processed Data (`data/processed/`) | ~87 MB | [📥 Download](https://drive.google.com/drive/folders/1UvEaj0CaaliLvRJMeHc-owbZkdkZ8AgA?usp=sharing) |
+| Trained Models (`outputs/models/`) | ~2.1 GB | [📥 Download](https://drive.google.com/drive/folders/1-8juChCyWMU6ylP6oWpDbtY_ntJLhUpM?usp=sharing) |
+| Reports & Charts (`outputs/reports/`) | ~150 MB | [📥 Download](https://drive.google.com/drive/folders/1GQ6pxJRdvFa9wSRmSbgMtO6RyzIQnlhd?usp=sharing) |
+
+> 📁 All assets in one folder: [Google Drive — Netflix RecSys](https://drive.google.com/drive/folders/10devSdismV_x2Etrv618S8VTt4akpP51?usp=sharing)
+
+Place downloaded folders at:
+
+```
+netflix-recsys/
+├── data/
+│   └── processed/          ← paste here
+└── outputs/
+    ├── models/             ← paste here
+    └── reports/            ← paste here
+```
+
+**Step 3 — Launch dashboard**
+```bash
+# Windows — fix Streamlit permissions first (one-time only)
+New-Item -ItemType Directory -Path "C:\Users\$env:USERNAME\.streamlit" -Force
+
+streamlit run app/streamlit_app.py
+```
+
+Open http://localhost:8501 in your browser. Done. ✅
+
+---
+
+### 🔬 Option B — Full Pipeline From Scratch (~4–6 hours)
+
+Train all models yourself from the raw Netflix Prize dataset.
+
+**Step 1 — Clone & install**
+```bash
+git clone https://github.com/25f1001872/netflix-recsys.git
+cd netflix-recsys
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+**Step 2 — Install PyTorch with CUDA (for NCF GPU training)**
+```bash
+# CUDA 11.8
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+
+# CUDA 12.1
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+
+# CPU only (slower training)
+pip install torch torchvision
+```
+
+**Step 3 — Download raw dataset**
+
+Option A — Kaggle CLI:
+```bash
+# Place kaggle.json at C:\Users\USERNAME\.kaggle\kaggle.json
+python scripts/download_data.py
+```
+
+Option B — Manual:
+1. Go to [Kaggle — Netflix Prize Data](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data)
+2. Download and extract to `data/raw/`
+
+**Step 4 — Preprocess**
+```bash
+python scripts/preprocess.py
+```
+> Samples 8M ratings, splits into train/val/test, saves parquet files. Runtime: ~10–15 minutes.
+
+**Step 5 — Train all models**
+```bash
+python scripts/train.py --model svd        # ~76 seconds
+python scripts/train.py --model als        # ~13 seconds
+python scripts/train.py --model item_cf    # ~54 seconds
+python scripts/train.py --model user_cf    # ~20 seconds
+python scripts/train.py --model ncf        # ~6 minutes (GPU)
+python scripts/train.py --model hybrid     # ~49 seconds
+```
+
+**Step 6 — Evaluate**
+```bash
+python scripts/evaluate.py --all --k 10 --n_users 5000
+```
+> Runtime: ~35–45 minutes (Item-CF is slowest).
+
+**Step 7 — Generate recommendations**
+```bash
+python scripts/generate_recommendations.py --model svd     --all_users --topk 10
+python scripts/generate_recommendations.py --model als     --all_users --topk 10
+python scripts/generate_recommendations.py --model ncf     --all_users --topk 10
+python scripts/generate_recommendations.py --model hybrid  --all_users --n_users 1000 --topk 10
+python scripts/generate_recommendations.py --model item_cf --user_ids "1001,...,1100" --topk 10
+python scripts/generate_recommendations.py --model user_cf --user_ids "1001,...,1100" --topk 10
+```
+
+**Step 8 — Analysis & visualization**
+```bash
+python scripts/analyze_recommendations.py
+python scripts/visualize_3d.py
+```
+
+**Step 9 — Launch dashboard**
+```bash
+streamlit run app/streamlit_app.py
+```
+
+---
+
 ## 🏗️ Project Structure
 
 ```
@@ -31,8 +163,8 @@ netflix-recsys/
 ├── configs/
 │   └── config.yaml                   # All hyperparameters and paths
 ├── data/
-│   ├── raw/                          # Downloaded Netflix Prize files (not committed)
-│   └── processed/                    # Parquet splits + encoders (not committed)
+│   ├── raw/                          # Raw Netflix Prize files (not committed)
+│   └── processed/                    # Parquet splits (not committed — see Drive)
 ├── notebooks/
 │   └── 01_EDA.ipynb                  # Exploratory Data Analysis
 ├── scripts/
@@ -62,7 +194,7 @@ netflix-recsys/
 │   │   └── plots.py                  # Reusable plot utilities
 │   └── utils/
 │       └── paths.py                  # Path utilities
-├── outputs/                          # Generated outputs (not committed)
+├── outputs/                          # Generated outputs (not committed — see Drive)
 │   ├── models/                       # Trained model .pkl files
 │   ├── recommendations/              # Generated recommendation CSVs
 │   └── reports/                      # Charts, metrics, EDA plots
@@ -71,125 +203,31 @@ netflix-recsys/
 └── README.md
 ```
 
-
----
-
-## ⚙️ Setup & Installation
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/25f1001872/netflix-recsys.git
-cd netflix-recsys
-```
-
-### 2. Create virtual environment
-```bash
-python -m venv venv
-
-# Windows
-venv\Scripts\activate
-
-# Linux/Mac
-source venv/bin/activate
-```
-
-### 3. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Install PyTorch with CUDA (for NCF GPU training)
-```bash
-# CUDA 11.8
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
-
-# CUDA 12.1
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-
-# CPU only
-pip install torch torchvision
-```
-
-### 5. Download the dataset
-See [`data/README.md`](data/README.md) for full instructions.
-
-**Quickest:** Download pre-processed files directly from [Google Drive](https://drive.google.com/drive/folders/1BHmm8tCai84doueU10fylx7l5J41FR9k?usp=sharing) and place them in `data/processed/`.
-
-**From scratch:** Download the raw Netflix Prize dataset from [Kaggle](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data), place in `data/raw/`, then run:
-```bash
-python scripts/preprocess.py
-```
-
----
-
-## 🚀 Reproducing Results
-
-> **Skip Step 1** if you downloaded pre-processed files from Google Drive.
-
-#### Step 1 — Preprocess
-```bash
-python scripts/preprocess.py
-```
-
-#### Step 2 — Train all models
-```bash
-python scripts/train.py --model svd
-python scripts/train.py --model als
-python scripts/train.py --model ncf
-python scripts/train.py --model item_cf
-python scripts/train.py --model user_cf
-python scripts/train.py --model hybrid
-```
-
-#### Step 3 — Evaluate
-```bash
-python scripts/evaluate.py --all --k 10 --n_users 5000
-```
-
-#### Step 4 — Generate recommendations
-```bash
-python scripts/generate_recommendations.py --model hybrid --all_users --topk 10
-```
-
-#### Step 5 — Analysis & Visualization
-```bash
-python scripts/analyze_recommendations.py
-python scripts/visualize_3d.py
-```
-
 ---
 
 ## 📐 Models Implemented
 
-### SVD — Singular Value Decomposition
-Matrix factorization via Surprise library.  
-Decomposes the user-item matrix into latent factors.  
-**Best for:** rating prediction accuracy.
+| Model | Type | Library | Train Time | RMSE | Best At |
+|-------|------|---------|------------|------|---------|
+| SVD | Matrix Factorization | scikit-surprise | 76s | 0.9566 | Rating accuracy |
+| ALS | Implicit Feedback | implicit | 13s | 1.3928 | Scale & speed |
+| NCF | Deep Learning | PyTorch (GPU) | 6min | 0.9426 | Ranking (MAP@10) |
+| Item-CF | Neighborhood | scikit-surprise | 54s | 1.0053 | Coverage & interpretability |
+| User-CF | Neighborhood | implicit (ALS embed) | 20s | 1.0514 | RAM-safe similarity |
+| Hybrid | Ridge Ensemble | scikit-learn | 49s | 0.9321 | Overall best |
 
-### ALS — Alternating Least Squares
-Implicit feedback model via the `implicit` library.  
-Treats ratings as confidence-weighted interactions.  
-**Best for:** large-scale implicit feedback datasets.
+### Hybrid Architecture
 
-### NCF — Neural Collaborative Filtering
-Deep learning model (PyTorch) with embedding layers and MLP tower. Trained on GPU.  
-**Best for:** ranking quality (MAP@10, NDCG).
+```
+Validation predictions:
+  SVD  ──→ ┐
+           ├──→ Ridge Regression ──→ Final score
+  NCF  ──→ ┘
 
-### Item-CF — Item-Based Collaborative Filtering
-Surprise KNNWithMeans with cosine similarity.  
-Item similarity matrix: 7,441 × 7,441.  
-**Best for:** interpretability and similarity explanations.
-
-### User-CF — User-Based Collaborative Filtering
-ALS-approximate neighborhood method.  
-RAM-safe: never materializes the full N×N user similarity matrix.  
-Uses cosine similarity on ALS latent vectors.
-
-### Hybrid — Ridge-Stacked Ensemble
-Meta-learner trained on validation predictions from SVD + NCF.  
-Ridge regression learns optimal combination weights.  
-Empirical weights: NCF=63.8%, SVD=36.2%.  
-**Best for:** combined RMSE + ranking performance.
+Learned weights (from Ridge coefficients):
+  NCF  : 63.8%  (stronger on ranking)
+  SVD  : 36.2%  (stronger on RMSE)
+```
 
 ---
 
@@ -200,58 +238,69 @@ Empirical weights: NCF=63.8%, SVD=36.2%.
 ```
 Total ratings  : 4,843,700
 Train          : 3,921,651  (80.9%)
-Validation     :   383,270  ( 7.9%)  ← used for hybrid meta-learner
-Test           :   538,779  (11.1%)  ← held out for final evaluation
+Validation     :   383,270  ( 7.9%)  ← hybrid meta-learner training
+Test           :   538,779  (11.1%)  ← final evaluation (held out)
 ```
 
 ### Metrics
 
-| Metric | Description |
-|--------|-------------|
-| **RMSE** | Root Mean Squared Error on rating prediction |
-| **MAP@10** | Mean Average Precision @ 10 (relevance threshold: rating ≥ 3.5★, 5,000 sampled test users) |
-| **NDCG@10** | Normalized Discounted Cumulative Gain |
-| **MRR@10** | Mean Reciprocal Rank |
-| **Hit Rate@10** | Fraction of users with ≥1 relevant item in top-10 |
-| **Coverage** | Fraction of catalogue appearing in recommendations |
-| **Novelty** | Mean self-information of recommended items |
-| **Gini** | Recommendation inequality coefficient |
+| Metric | Description | Direction |
+|--------|-------------|-----------|
+| RMSE | Root Mean Squared Error on rating prediction | ↓ lower better |
+| MAP@10 | Mean Average Precision @ 10 (threshold ≥ 3.5★) | ↑ higher better |
+| NDCG@10 | Normalized Discounted Cumulative Gain | ↑ higher better |
+| MRR@10 | Mean Reciprocal Rank | ↑ higher better |
+| Hit Rate@10 | Users with ≥1 relevant item in top-10 | ↑ higher better |
+| Coverage | Fraction of catalogue in recommendations | ↑ higher better |
+| Novelty | Mean self-information of recommended items | ↑ higher better |
+| Gini | Recommendation inequality coefficient | ↓ lower better |
 
 ---
 
 ## 🔑 Key Findings
 
-- **Hybrid wins on RMSE (0.9321)** — Ridge stacking outperforms all individual models on rating accuracy.
+- **Hybrid wins on RMSE (0.9321)** — Ridge stacking outperforms all individual models. Ridge coefficients confirm NCF contributes 63.8% of the signal.
 
-- **NCF wins on ranking (MAP@10=0.0085)** — Deep learning captures non-linear preference patterns better than matrix factorization.
+- **NCF wins on ranking (MAP@10=0.0085)** — Deep learning captures non-linear preference patterns that matrix factorization cannot.
 
-- **Coverage-accuracy tradeoff** — NCF achieves best MAP but only 2.2% catalogue coverage (recommends same popular items repeatedly). Item-CF achieves 19.7% coverage with lower accuracy.
+- **Coverage-accuracy tradeoff is fundamental** — NCF achieves best MAP but only 2.2% catalogue coverage. Item-CF achieves 19.7% coverage with lower accuracy. No single model dominates all dimensions.
 
-- **Low MAP@10 is expected** — Consistent with Netflix Prize literature. The test set contains ratings for movies users actually chose to watch, making unseen relevant items hard to predict without exposure data.
+- **Low MAP@10 is expected and consistent with literature** — Test set contains only movies users actually chose to watch. Truly unseen relevant items cannot be predicted without exposure data (a known limitation of explicit feedback evaluation).
 
-- **Low model agreement** — Jaccard overlap between SVD and NCF recommendation lists is only 12.2%, confirming each model captures different preference signals. This diversity is what makes the hybrid effective.
+- **Models are highly diverse** — SVD ↔ NCF Jaccard overlap is only 12.2%. This diversity is exactly why the hybrid ensemble works.
 
 ---
 
 ## 📁 Dataset
 
 **Netflix Prize Dataset**
-- ~100M ratings (full) / ~4.8M (this subset)
-- 480,189 users / 17,770 movies (full)
-- Ratings: 1–5 stars with timestamps
-- **Source:** [Kaggle](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data)
+- 100,480,507 ratings (full) / ~4.8M ratings (this subset — 8M sampled, filtered)
+- 480,189 users / 17,770 movies (full) → 104,606 users / 7,441 movies (subset)
+- Ratings: 1–5 stars with timestamps (1999–2005)
+- **Source:** [Kaggle — Netflix Prize Data](https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data)
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Component | Library |
-|-----------|---------|
-| Matrix Factorization | `scikit-surprise` |
-| ALS | `implicit` |
-| Neural CF | `PyTorch` (CUDA) |
-| Data Processing | `pandas`, `numpy`, `pyarrow` |
-| Evaluation | `scikit-learn`, `scipy` |
-| Visualization | `matplotlib`, `seaborn`, `plotly` |
-| Serialization | `joblib` |
-| Notebook | Jupyter / VS Code |
+| Component | Library | Version |
+|-----------|---------|---------|
+| Matrix Factorization | scikit-surprise | ≥1.1.3 |
+| ALS / User-CF embeddings | implicit | ≥0.7.2 |
+| Neural CF | PyTorch (CUDA) | ≥2.1.0 |
+| Data Processing | pandas, numpy, pyarrow | latest |
+| Evaluation | scikit-learn, scipy | latest |
+| 2D Visualization | matplotlib, seaborn | latest |
+| 3D / Interactive | plotly | ≥5.17.0 |
+| Dashboard | streamlit | ≥1.28.0 |
+| Serialization | joblib | latest |
+| Notebook | Jupyter / VS Code | latest |
+
+---
+
+## ⚠️ Known Limitations
+
+- **ALS ranking metrics not reported** — ALS is an implicit feedback model; evaluating it on explicit rating prediction is a known methodology mismatch.
+- **User-CF ranking not evaluated** — Computational constraints (7,441 items × 104,606 users × sparse operations per query).
+- **Subset of full dataset** — 8M of 100M ratings used due to hardware constraints. Results on full dataset would differ.
+- **Cold-start users** — Users not in training data receive popularity-based recommendations as fallback.
