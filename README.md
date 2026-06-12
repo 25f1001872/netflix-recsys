@@ -206,14 +206,14 @@ netflix-recsys/
 
 ## 📐 Models Implemented
 
-| Model | Type | Library | Train Time | RMSE | Best At |
+| Model | Type | Library | RMSE | Best At |
 |-------|------|---------|------------|------|---------|
-| SVD | Matrix Factorization | scikit-surprise | 76s | 0.9566 | Rating accuracy |
-| ALS | Implicit Feedback | implicit | 13s | 1.3928 | Scale & speed |
-| NCF | Deep Learning | PyTorch (GPU) | 6min | 0.9426 | Ranking (MAP@10) |
-| Item-CF | Neighborhood | scikit-surprise | 54s | 1.0053 | Coverage & interpretability |
-| User-CF | Neighborhood | implicit (ALS embed) | 20s | 1.0514 | RAM-safe similarity |
-| Hybrid | Ridge Ensemble | scikit-learn | 49s | 0.9321 | Overall best |
+| SVD | Matrix Factorization | scikit-surprise | 0.9566 | Rating accuracy |
+| ALS | Implicit Feedback | implicit | 1.3928 | Scale & speed |
+| NCF | Deep Learning | PyTorch (GPU) | 0.9426 | Ranking (MAP@10) |
+| Item-CF | Neighborhood | scikit-surprise | 1.0053 | Coverage & interpretability |
+| User-CF | Neighborhood | implicit (ALS embed) | 1.0514 | RAM-safe similarity |
+| Hybrid | Ridge Ensemble | scikit-learn | 0.9321 | Overall best |
 
 ### Hybrid Architecture
 
