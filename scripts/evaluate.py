@@ -1,7 +1,6 @@
 # scripts/evaluate.py
 """
 evaluate.py
------------
 Production evaluation pipeline.
 Saves every metric, curve, and raw array needed for 3D visualization.
 """
@@ -33,7 +32,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("evaluate")
 
-# ── colour palette (consistent across all plots) ─────────────────────
+# ── colour palette (consistent across all plots)
 MODEL_COLORS = {
     "SVD"    : "#E50914",
     "ALS"    : "#F5A623",
@@ -49,9 +48,7 @@ def model_color(name: str) -> str:
     return MODEL_COLORS.get(name.upper(), DEFAULT_COLOR)
 
 
-# ══════════════════════════════════════════════════════════════════════
 # Terminal table
-# ══════════════════════════════════════════════════════════════════════
 
 def print_metrics_table(results_df: pd.DataFrame):
     print("\n" + "=" * 100)
@@ -61,9 +58,7 @@ def print_metrics_table(results_df: pd.DataFrame):
     print("=" * 100)
 
 
-# ══════════════════════════════════════════════════════════════════════
 # Markdown / CSV export
-# ══════════════════════════════════════════════════════════════════════
 
 def export_results(results_df: pd.DataFrame, out_dir: str):
     # CSV
@@ -80,9 +75,7 @@ def export_results(results_df: pd.DataFrame, out_dir: str):
     logger.info(f"📝 Markdown saved → {md_path}")
 
 
-# ══════════════════════════════════════════════════════════════════════
 # 2-D Charts (slide-ready)
-# ══════════════════════════════════════════════════════════════════════
 
 def plot_accuracy_vs_ranking(results_df: pd.DataFrame, out_dir: str, k: int):
     """Dual-axis bar: RMSE (left) vs MAP@K (right)."""
@@ -342,7 +335,6 @@ def plot_heatmap(results_df: pd.DataFrame, out_dir: str):
     data = results_df[scalar_cols].copy().astype(float)
 
     # Normalise each column to [0,1] for visual comparison
-    # Flip RMSE / MAE / MSE / Gini (lower = better → invert)
     lower_is_better = ["rmse", "mae", "mse", "gini",
                        "error_std", "error_p50", "error_p95"]
     normed = data.copy()
@@ -371,10 +363,7 @@ def plot_heatmap(results_df: pd.DataFrame, out_dir: str):
     plt.close()
     logger.info(f"🎨 Metric heatmap saved → {path}")
 
-
-# ══════════════════════════════════════════════════════════════════════
 # Rich-data NPZ export  (feed this into your 3D viz script)
-# ══════════════════════════════════════════════════════════════════════
 
 def export_rich_data(
     model_name: str,
@@ -430,9 +419,7 @@ def export_rich_data(
         logger.info(f"  💾 Rich NPZ saved → {npz_path}")
 
 
-# ══════════════════════════════════════════════════════════════════════
 # Model loader
-# ══════════════════════════════════════════════════════════════════════
 
 def load_model(name: str, models_dir: str):
     path = os.path.join(models_dir, f"{name}.pkl")
@@ -443,9 +430,7 @@ def load_model(name: str, models_dir: str):
     return joblib.load(path)
 
 
-# ══════════════════════════════════════════════════════════════════════
 # Main
-# ══════════════════════════════════════════════════════════════════════
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate Netflix Recommendation Models")
@@ -471,7 +456,7 @@ def main():
     from src.data.loader import load_processed
     _, _, test_df = load_processed(processed_dir)
 
-    # ── Decide which models to run ─────────────────────────────────────
+    # Decide which models to run 
     available = ["svd", "als", "user_cf", "item_cf", "ncf", "hybrid"]
     if args.all:
         model_names = [
@@ -493,7 +478,7 @@ def main():
     all_per_user:      Dict[str, pd.DataFrame] = {}
     all_item_counters: Dict[str, Counter] = {}
 
-    # ── Evaluate each model ────────────────────────────────────────────
+    # ── Evaluate each model 
     for name in model_names:
         model = load_model(name, models_dir)
         if model is None:
